@@ -10,9 +10,9 @@ import lombok.extern.slf4j.Slf4j;
 @val
 @Slf4j
 @Service
-public class FBMessangerBotService {
-	final String FBMESSANGERBOT_VERIFY_TOKEN = System.getenv("FBMESSANGERBOT_VERIFY_TOKEN");
-	final String FBMESSANGERBOT_ACCESS_TOKEN = System.getenv("FBMESSANGERBOT_ACCESS_TOKEN");
+public class FBMessengerBotService {
+	final String FBMESSENGERBOT_VERIFY_TOKEN = System.getenv("FBMESSENGERBOT_VERIFY_TOKEN");
+	final String FBMESSENGERBOT_ACCESS_TOKEN = System.getenv("FBMESSENGERBOT_ACCESS_TOKEN");
 
 	public String verify(HttpServletRequest request) {
 		try {
@@ -22,7 +22,7 @@ public class FBMessangerBotService {
 			val mapStream = params.entrySet().stream();
 			mapStream.forEach(e -> log.info(String.format("%s:%s", e.getKey(), String.join("", e.getValue()))));
 			
-			if (params.get("hub.mode").equals("subscribe") && params.get("hub.verify_token").equals(FBMESSANGERBOT_VERIFY_TOKEN)) {
+			if (params.get("hub.mode").equals("subscribe") && params.get("hub.verify_token").equals(FBMESSENGERBOT_VERIFY_TOKEN)) {
 				return String.join("", params.get("hub.challenge"));
 			}
 		} catch (Exception e) {
@@ -31,7 +31,7 @@ public class FBMessangerBotService {
 		return "failed";
 	}
 
-	public String sentToMessanger(HttpServletRequest request) {
+	public String sentToMessenger(HttpServletRequest request) {
 		try {
 			val params = request.getParameterMap();
 			// debug

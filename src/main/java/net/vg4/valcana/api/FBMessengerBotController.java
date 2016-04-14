@@ -9,14 +9,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
-import net.vg4.valcana.service.FBMessangerBotService;
+import net.vg4.valcana.service.FBMessengerBotService;
 
 @RestController
 @Slf4j
 @val
-public class FBMessangerBotController {
+public class FBMessengerBotController {
 	@Autowired
-	FBMessangerBotService botService;
+	FBMessengerBotService botService;
 
 	@RequestMapping(value = "/fbmessangerbot", method = RequestMethod.GET)
 	String verify(HttpServletRequest request) throws RuntimeException {
@@ -24,7 +24,7 @@ public class FBMessangerBotController {
 	}
 	@RequestMapping(value = "/fbmessangerbot", method = RequestMethod.POST)
 	String message(HttpServletRequest request) throws RuntimeException {
-		return botService.sentToMessanger(request);
+		return botService.sentToMessenger(request);
 	}
 
 }
