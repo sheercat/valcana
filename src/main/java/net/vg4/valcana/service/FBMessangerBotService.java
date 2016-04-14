@@ -11,20 +11,40 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 public class FBMessangerBotService {
-	final String FBMESSAGEAPI_ENDPOINT = "https://trialbot-api.line.me/v1/events";
+	final String VERIFY_TOKEN = System.getenv("VERIFY_TOKEN");
+	final String ACCESS_TOKEN = System.getenv("ACCESS_TOKEN");
 
-	public void sendToChannel(HttpServletRequest request) {
+	public String verify(HttpServletRequest request) {
 		try {
-			val jb = new StringBuffer();
-			request.getReader().lines().forEach(jb::append);
-			log.info(jb.toString());
+			val params = request.getParameterMap();
 
-//			val mapper = new ObjectMapper();
-//			val botResponse = mapper.readValue(jb.toString(), LineBotResponse.class);
-
-//			botResponse.getResult().stream().forEach(this::sendRequest);
+			// debug
+			val mapStream = params.entrySet().stream();
+			mapStream.forEach(e -> log.info(String.format("%s:%s", e.getKey(), String.join("", e.getValue()))));
+			
+			if (params.get("hub.mode").equals("subscribe") && params.get("hub.verify_token").equals(VERIFY_TOKEN)) {
+				return String.join("", params.get("hub.challenge"));
+			}
 		} catch (Exception e) {
-			log.error(e.toString());
+			e.printStackTrace();
 		}
+		return "failed";
+	}
+
+	public String sentToMessanger(HttpServletRequest request) {
+		try {
+			val params = request.getParameterMap();
+
+			// debug
+			val mapStream = params.entrySet().stream();
+			mapStream.forEach(e -> log.info(String.format("%s:%s", e.getKey(), String.join("", e.getValue()))));
+			
+			if (params.get("hub.mode").equals("subscribe") && params.get("hub.verify_token").equals(VERIFY_TOKEN)) {
+				return String.join("", params.get("hub.challenge"));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return "failed";
 	}
 }
