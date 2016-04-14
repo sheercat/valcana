@@ -18,11 +18,11 @@ public class FBMessengerBotController {
 	@Autowired
 	FBMessengerBotService botService;
 
-	@RequestMapping(value = "/fbmessangerbot", method = RequestMethod.GET)
+	@RequestMapping(value = "/fbmessengerbot", method = RequestMethod.GET)
 	String verify(HttpServletRequest request) throws RuntimeException {
 		return botService.verify(request);
 	}
-	@RequestMapping(value = "/fbmessangerbot", method = RequestMethod.POST)
+	@RequestMapping(value = "/fbmessengerbot", method = RequestMethod.POST)
 	String message(HttpServletRequest request) throws RuntimeException {
 		return botService.sentToMessenger(request);
 	}
