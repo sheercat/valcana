@@ -27,7 +27,7 @@ import net.vg4.valcana.model.LineBotResponseResult;
 @val
 @Slf4j
 public class LineBotService {
-	final String LINEBOTAPI_ENDPOINT = "https://trialbot-api.line.me/v1/events";
+	final String LINEBOTAPI_ENDPOINT = System.getenv("LINEBOTAPI_ENDPOINT");
 	final String LINE_CHANNEL_ID = System.getenv("LINE_CHANNEL_ID");
 	final String LINE_CHANNEL_SECRET = System.getenv("LINE_CHANNEL_SECRET");
 	final String LINE_CHANNEL_MID = System.getenv("LINE_CHANNEL_MID");
