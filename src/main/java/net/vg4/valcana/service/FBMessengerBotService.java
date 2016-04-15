@@ -49,8 +49,6 @@ public class FBMessengerBotService {
 					&& paramMap.get("hub.verify_token")[0].equals(FBMESSENGERBOT_VERIFY_TOKEN)) {
 				return String.join("", paramMap.get("hub.challenge"));
 			}
-		} catch (UnrecognizedPropertyException ex) {
-			;
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
@@ -68,7 +66,7 @@ public class FBMessengerBotService {
 			log.error("!!!" + ToStringBuilder.reflectionToString(botResponse));
 			botResponse.getEntry().forEach(e -> e.getMessaging().stream().forEach(this::sendMessage));
 		} catch (UnrecognizedPropertyException ex) {
-			ex.printStackTrace();
+			;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
