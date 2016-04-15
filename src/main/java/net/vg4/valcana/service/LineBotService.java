@@ -23,16 +23,22 @@ import net.vg4.valcana.model.LineBotRequest;
 import net.vg4.valcana.model.LineBotResponse;
 import net.vg4.valcana.model.LineBotResponseResult;
 
-@Service
+@Service("line")
 @val
 @Slf4j
-public class LineBotService {
+public class LineBotService implements BotService {
 	final String LINEBOTAPI_ENDPOINT = System.getenv("LINEBOTAPI_ENDPOINT");
 	final String LINE_CHANNEL_ID = System.getenv("LINE_CHANNEL_ID");
 	final String LINE_CHANNEL_SECRET = System.getenv("LINE_CHANNEL_SECRET");
 	final String LINE_CHANNEL_MID = System.getenv("LINE_CHANNEL_MID");
 
-	public void sendToChannel(HttpServletRequest request) {
+	@Override
+	public String verify(HttpServletRequest request) {
+		return "ok";
+	}
+
+	@Override
+	public String send(HttpServletRequest request) {
 		try {
 			val jb = new StringBuffer();
 			request.getReader().lines().forEach(jb::append);
@@ -45,6 +51,7 @@ public class LineBotService {
 		} catch (Exception e) {
 			log.error(e.toString());
 		}
+		return "ok";
 	}
 
 	void sendRequest(LineBotResponseResult botResponse) {
