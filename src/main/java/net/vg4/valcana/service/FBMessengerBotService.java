@@ -21,12 +21,12 @@ import org.apache.http.impl.client.HttpClients;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 import net.vg4.valcana.model.FBMessengerBotWebhook;
 import net.vg4.valcana.model.FBMessengerBotWebhookEntryMessaging;
-import net.vg4.valcana.model.FBMessengerBotWebhookEntryMessagingMessage;
 import net.vg4.valcana.model.FBMessengerBotWebhookRecipient;
 
 @val
@@ -65,6 +65,8 @@ public class FBMessengerBotService {
 			val botResponse = mapper.readValue(jb.toString(), FBMessengerBotWebhook.class);
 			log.error("!!!" + ToStringBuilder.reflectionToString(botResponse));
 			botResponse.getEntry().forEach(e -> e.getMessaging().stream().forEach(this::sendMessage));
+		} catch (UnrecognizedPropertyException ex) {
+			ex.printStackTrace();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -82,6 +84,7 @@ public class FBMessengerBotService {
 			val recipient = new FBMessengerBotWebhookRecipient();
 			recipient.setRecipient(messaging.getSender());
 			val post = new HttpPost(builder.build());
+			post.setHeader("Content-Type", "application/json; charset=UTF-8");
 			try (val httpclient = HttpClients.createDefault()) {
 				stream.forEach(e -> sendOneRequest(httpclient, post, recipient, e));
 			}
