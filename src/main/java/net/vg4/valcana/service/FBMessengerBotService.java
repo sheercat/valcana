@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 import net.vg4.valcana.model.FBMessengerBotWebhook;
+import net.vg4.valcana.model.FBMessengerBotWebhookEntryMessaging;
 import net.vg4.valcana.model.FBMessengerBotWebhookEntryMessagingMessage;
 import net.vg4.valcana.model.FBMessengerBotWebhookRecipient;
 
@@ -63,26 +64,23 @@ public class FBMessengerBotService {
 			val mapper = new ObjectMapper();
 			val botResponse = mapper.readValue(jb.toString(), FBMessengerBotWebhook.class);
 			log.error("!!!" + ToStringBuilder.reflectionToString(botResponse));
-			// botResponse.getEntry().forEach(e ->
-			// e.getMessaging().stream().forEach(f ->
-			// sendMessage(f.getMessage())));
+			botResponse.getEntry().forEach(e -> e.getMessaging().stream().forEach(this::sendMessage));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return "ok";
 	}
 
-	void sendMessage(FBMessengerBotWebhookEntryMessagingMessage message) {
+	void sendMessage(FBMessengerBotWebhookEntryMessaging messaging) {
 		try {
+			val message = messaging.getMessage();
 			val text = message.getText();
 			log.info(text);
 			Stream<String> stream = Arrays.stream(text.split(""));
 			val builder = new URIBuilder(FBMESSENGERBOT_ENDPOINT);
 			builder.setParameter("access_token", FBMESSENGERBOT_ACCESS_TOKEN);
 			val recipient = new FBMessengerBotWebhookRecipient();
-			Map<String, String> recipientMap = new HashMap<>();
-			recipientMap.put("id", "HOGE");
-			recipient.setRecipient(recipientMap);
+			recipient.setRecipient(messaging.getSender());
 			val post = new HttpPost(builder.build());
 			try (val httpclient = HttpClients.createDefault()) {
 				stream.forEach(e -> sendOneRequest(httpclient, post, recipient, e));
