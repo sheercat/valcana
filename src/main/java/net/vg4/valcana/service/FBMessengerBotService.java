@@ -49,8 +49,10 @@ public class FBMessengerBotService {
 					&& paramMap.get("hub.verify_token")[0].equals(FBMESSENGERBOT_VERIFY_TOKEN)) {
 				return String.join("", paramMap.get("hub.challenge"));
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (UnrecognizedPropertyException ex) {
+			;
+		} catch (Exception ex) {
+			ex.printStackTrace();
 		}
 		return "failed";
 	}
