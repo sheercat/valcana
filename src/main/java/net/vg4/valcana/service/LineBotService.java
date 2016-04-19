@@ -68,7 +68,7 @@ public class LineBotService implements BotService {
 				post.setHeader("X-Line-ChannelSecret", LINE_CHANNEL_SECRET);
 				post.setHeader("X-Line-Trusted-User-With-ACL", LINE_CHANNEL_MID);
 				try (CloseableHttpClient httpclient = HttpClients.createDefault()) { // .custom()
-					stream.forEach(e -> sendOneRequest(httpclient, post, request, e));
+					stream.parallel().forEach(e -> sendOneRequest(httpclient, post, request, e));
 				} catch (IOException ex) {
 					throw ex;
 				}

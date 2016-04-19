@@ -7,7 +7,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.stream.Stream;
 
 import javax.servlet.http.HttpServletRequest;
@@ -88,7 +87,7 @@ public class FBMessengerBotService implements BotService {
 				HttpPost post = new HttpPost(builder.build());
 				post.setHeader("Content-Type", "application/json; charset=UTF-8");
 				try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
-					stream.forEach(e -> sendOneRequest(httpclient, post, recipient, e));
+					stream.parallel().forEach(e -> sendOneRequest(httpclient, post, recipient, e));
 				} catch (IOException ex) {
 					throw ex;
 				}
