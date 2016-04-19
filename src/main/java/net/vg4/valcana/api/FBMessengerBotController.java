@@ -8,12 +8,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import lombok.val;
 import net.vg4.valcana.service.BotService;
 
 @RestController
 //@Slf4j
-@val
 public class FBMessengerBotController {
 	@Autowired
 	@Qualifier("fb")

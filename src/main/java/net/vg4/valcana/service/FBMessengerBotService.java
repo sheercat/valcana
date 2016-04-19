@@ -3,7 +3,6 @@ package net.vg4.valcana.service;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -44,8 +43,8 @@ public class FBMessengerBotService implements BotService {
 			Map<String, String[]> paramMap = request.getParameterMap();
 
 			// debug
-			Stream<Entry<String, String[]>> mapStream = paramMap.entrySet().stream();
-			mapStream.forEach(e -> log.info(String.format("%s:%s", e.getKey(), String.join("", e.getValue()))));
+			paramMap.entrySet().stream()
+					.forEach(e -> log.info(String.format("%s:%s", e.getKey(), String.join("", e.getValue()))));
 
 			if (paramMap.get("hub.mode")[0].equals("subscribe")
 					&& paramMap.get("hub.verify_token")[0].equals(FBMESSENGERBOT_VERIFY_TOKEN)) {
@@ -81,20 +80,23 @@ public class FBMessengerBotService implements BotService {
 			FBMessengerBotWebhookEntryMessagingMessage message = messaging.getMessage();
 			String text = message.getText();
 			log.info(text);
-			Stream<String> stream = Arrays.stream(text.split(""));
-			URIBuilder builder = new URIBuilder(FBMESSENGERBOT_ENDPOINT);
-			builder.setParameter("access_token", FBMESSENGERBOT_ACCESS_TOKEN);
-			FBMessengerBotWebhookRecipient recipient = new FBMessengerBotWebhookRecipient();
-			recipient.setRecipient(messaging.getSender());
-			HttpPost post = new HttpPost(builder.build());
-			post.setHeader("Content-Type", "application/json; charset=UTF-8");
-			try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
-				stream.forEach(e -> sendOneRequest(httpclient, post, recipient, e));
+			try (Stream<String> stream = Arrays.stream(text.split(""))) {
+				URIBuilder builder = new URIBuilder(FBMESSENGERBOT_ENDPOINT);
+				builder.setParameter("access_token", FBMESSENGERBOT_ACCESS_TOKEN);
+				FBMessengerBotWebhookRecipient recipient = new FBMessengerBotWebhookRecipient();
+				recipient.setRecipient(messaging.getSender());
+				HttpPost post = new HttpPost(builder.build());
+				post.setHeader("Content-Type", "application/json; charset=UTF-8");
+				try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
+					stream.forEach(e -> sendOneRequest(httpclient, post, recipient, e));
+				} catch (IOException ex) {
+					throw ex;
+				}
+			} catch (IOException ex) {
+				throw ex;
 			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (URISyntaxException e) {
-			e.printStackTrace();
+		} catch (Exception ex) {
+			ex.printStackTrace();
 		}
 	}
 
@@ -110,19 +112,21 @@ public class FBMessengerBotService implements BotService {
 			log.info(json);
 
 			post.setEntity(new StringEntity(json, StandardCharsets.UTF_8));
-			CloseableHttpResponse res = client.execute(post);
-
-			Arrays.stream(res.getAllHeaders()).forEach(e -> log.info(e.toString()));
-			try (BufferedReader br = new BufferedReader(
-					new InputStreamReader(res.getEntity().getContent(), StandardCharsets.UTF_8))) {
-				br.lines().forEach(e -> log.info(e.toString()));
-			} catch (IOException e) {
-				e.printStackTrace();
+			try (CloseableHttpResponse res = client.execute(post)) {
+				Arrays.stream(res.getAllHeaders()).forEach(e -> log.info(e.toString()));
+				try (BufferedReader br = new BufferedReader(
+						new InputStreamReader(res.getEntity().getContent(), StandardCharsets.UTF_8))) {
+					br.lines().forEach(e -> log.info(e.toString()));
+				} catch (IOException ex) {
+					throw ex;
+				}
+				log.info("JSON:" + json);
+				log.info("STATUSLINE:" + res.getStatusLine().toString());
+			} catch (IOException ex) {
+				throw ex;
 			}
-			log.info("JSON:" + json);
-			log.info("STATUSLINE:" + res.getStatusLine().toString());
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch (Exception ex) {
+			ex.printStackTrace();
 		}
 	}
 }

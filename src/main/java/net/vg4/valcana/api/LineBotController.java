@@ -8,13 +8,11 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 import net.vg4.valcana.service.BotService;
 
 @RestController
 @Slf4j
-@val
 public class LineBotController {
 	@Autowired
 	@Qualifier("line")
@@ -23,7 +21,7 @@ public class LineBotController {
 	@RequestMapping(value = "/linebot")
 	String index(HttpServletRequest request) throws RuntimeException {
 		botService.send(request);
-		val reqestByString = ToStringBuilder.reflectionToString(request);
+		String reqestByString = ToStringBuilder.reflectionToString(request);
 		log.info("!!!" + reqestByString);
 		return "OK";
 	}

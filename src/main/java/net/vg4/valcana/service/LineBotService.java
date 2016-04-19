@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -17,14 +18,13 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 import net.vg4.valcana.model.LineBotRequest;
 import net.vg4.valcana.model.LineBotResponse;
+import net.vg4.valcana.model.LineBotResponseContent;
 import net.vg4.valcana.model.LineBotResponseResult;
 
 @Service("line")
-@val
 @Slf4j
 public class LineBotService implements BotService {
 	final String LINEBOTAPI_ENDPOINT = System.getenv("LINEBOTAPI_ENDPOINT");
@@ -40,12 +40,12 @@ public class LineBotService implements BotService {
 	@Override
 	public String send(HttpServletRequest request) {
 		try {
-			val jb = new StringBuffer();
+			StringBuffer jb = new StringBuffer();
 			request.getReader().lines().forEach(jb::append);
 			log.info(jb.toString());
 
-			val mapper = new ObjectMapper();
-			val botResponse = mapper.readValue(jb.toString(), LineBotResponse.class);
+			ObjectMapper mapper = new ObjectMapper();
+			LineBotResponse botResponse = mapper.readValue(jb.toString(), LineBotResponse.class);
 
 			botResponse.getResult().stream().forEach(this::sendRequest);
 		} catch (Exception e) {
@@ -56,45 +56,52 @@ public class LineBotService implements BotService {
 
 	void sendRequest(LineBotResponseResult botResponse) {
 		try {
-			val botContent = botResponse.getContent();
-			val request = new LineBotRequest();
+			LineBotRequest request = new LineBotRequest();
+			LineBotResponseContent botContent = botResponse.getContent();
 			request.setTo(Arrays.asList(botContent.getFrom()));
 			request.setContent(botContent);
-			val text = botContent.getText();
-			Stream<String> stream = Arrays.stream(text.split(""));
-			val post = new HttpPost(LINEBOTAPI_ENDPOINT);
-			post.setHeader("Content-Type", "application/json; charset=UTF-8");
-			post.setHeader("X-Line-ChannelID", LINE_CHANNEL_ID);
-			post.setHeader("X-Line-ChannelSecret", LINE_CHANNEL_SECRET);
-			post.setHeader("X-Line-Trusted-User-With-ACL", LINE_CHANNEL_MID);
-			try (val httpclient = HttpClients.createDefault()) { // .custom()
-				stream.forEach(e -> sendOneRequest(httpclient, post, request, e));
+			String text = botContent.getText();
+			try (Stream<String> stream = Arrays.stream(text.split(""))) {
+				HttpPost post = new HttpPost(LINEBOTAPI_ENDPOINT);
+				post.setHeader("Content-Type", "application/json; charset=UTF-8");
+				post.setHeader("X-Line-ChannelID", LINE_CHANNEL_ID);
+				post.setHeader("X-Line-ChannelSecret", LINE_CHANNEL_SECRET);
+				post.setHeader("X-Line-Trusted-User-With-ACL", LINE_CHANNEL_MID);
+				try (CloseableHttpClient httpclient = HttpClients.createDefault()) { // .custom()
+					stream.forEach(e -> sendOneRequest(httpclient, post, request, e));
+				} catch (IOException ex) {
+					throw ex;
+				}
+			} catch (IOException ex) {
+				throw ex;
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (Exception ex) {
+			ex.printStackTrace();
 		}
 	}
 
 	void sendOneRequest(CloseableHttpClient client, HttpPost post, LineBotRequest request, String oneString) {
 		try {
 			request.getContent().setText(oneString);
-			val mapper = new ObjectMapper();
-			val json = mapper.writeValueAsString(request);
+			ObjectMapper mapper = new ObjectMapper();
+			String json = mapper.writeValueAsString(request);
 
 			post.setEntity(new StringEntity(json, StandardCharsets.UTF_8));
-			val res = client.execute(post);
-
-			Arrays.stream(res.getAllHeaders()).forEach(e -> log.info(e.toString()));
-			try (val br = new BufferedReader(
-					new InputStreamReader(res.getEntity().getContent(), StandardCharsets.UTF_8))) {
-				br.lines().forEach(e -> log.info(e.toString()));
-			} catch (IOException e) {
-				e.printStackTrace();
+			try (CloseableHttpResponse res = client.execute(post)) {
+				Arrays.stream(res.getAllHeaders()).forEach(e -> log.info(e.toString()));
+				try (BufferedReader br = new BufferedReader(
+						new InputStreamReader(res.getEntity().getContent(), StandardCharsets.UTF_8))) {
+					br.lines().forEach(e -> log.info(e.toString()));
+				} catch (IOException ex) {
+					throw ex;
+				}
+				log.info("JSON:" + json);
+				log.info("STATUSLINE:" + res.getStatusLine().toString());
+			} catch (IOException ex) {
+				throw ex;
 			}
-			log.info("JSON:" + json);
-			log.info("STATUSLINE:" + res.getStatusLine().toString());
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch (Exception ex) {
+			ex.printStackTrace();
 		}
 	}
 
