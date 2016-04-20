@@ -56,10 +56,7 @@ public class LineBotService implements BotService {
 
 	void sendRequest(LineBotResponseResult botResponse) {
 		try {
-			LineBotRequest request = new LineBotRequest();
 			LineBotResponseContent botContent = botResponse.getContent();
-			request.setTo(Arrays.asList(botContent.getFrom()));
-			request.setContent(botContent);
 			String text = botContent.getText();
 			try (Stream<String> stream = Arrays.stream(text.split(""))) {
 				HttpPost post = new HttpPost(LINEBOTAPI_ENDPOINT);
@@ -68,7 +65,7 @@ public class LineBotService implements BotService {
 				post.setHeader("X-Line-ChannelSecret", LINE_CHANNEL_SECRET);
 				post.setHeader("X-Line-Trusted-User-With-ACL", LINE_CHANNEL_MID);
 				try (CloseableHttpClient httpclient = HttpClients.createDefault()) { // .custom()
-					stream.parallel().forEach(e -> sendOneRequest(httpclient, post, request, e));
+					stream.parallel().forEach(e -> sendOneRequest(httpclient, post, botContent, e));
 				} catch (IOException ex) {
 					throw ex;
 				}
@@ -80,8 +77,12 @@ public class LineBotService implements BotService {
 		}
 	}
 
-	void sendOneRequest(CloseableHttpClient client, HttpPost post, LineBotRequest request, String oneString) {
+	void sendOneRequest(CloseableHttpClient client, HttpPost post, LineBotResponseContent botContent,
+			String oneString) {
 		try {
+			LineBotRequest request = new LineBotRequest();
+			request.setTo(Arrays.asList(botContent.getFrom()));
+			request.setContent(botContent);
 			request.getContent().setText(oneString);
 			ObjectMapper mapper = new ObjectMapper();
 			String json = mapper.writeValueAsString(request);

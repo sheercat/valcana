@@ -82,12 +82,10 @@ public class FBMessengerBotService implements BotService {
 			try (Stream<String> stream = Arrays.stream(text.split(""))) {
 				URIBuilder builder = new URIBuilder(FBMESSENGERBOT_ENDPOINT);
 				builder.setParameter("access_token", FBMESSENGERBOT_ACCESS_TOKEN);
-				FBMessengerBotWebhookRecipient recipient = new FBMessengerBotWebhookRecipient();
-				recipient.setRecipient(messaging.getSender());
 				HttpPost post = new HttpPost(builder.build());
 				post.setHeader("Content-Type", "application/json; charset=UTF-8");
 				try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
-					stream.parallel().forEach(e -> sendOneRequest(httpclient, post, recipient, e));
+					stream.parallel().forEach(e -> sendOneRequest(httpclient, post, messaging, e));
 				} catch (IOException ex) {
 					throw ex;
 				}
@@ -99,9 +97,12 @@ public class FBMessengerBotService implements BotService {
 		}
 	}
 
-	void sendOneRequest(CloseableHttpClient client, HttpPost post, FBMessengerBotWebhookRecipient recipient,
+	void sendOneRequest(CloseableHttpClient client, HttpPost post, FBMessengerBotWebhookEntryMessaging messaging,
 			String oneString) {
 		try {
+			FBMessengerBotWebhookRecipient recipient = new FBMessengerBotWebhookRecipient();
+			recipient.setRecipient(messaging.getSender());
+
 			Map<String, String> message = new HashMap<>();
 			message.put("text", oneString);
 			recipient.setMessage(message);
