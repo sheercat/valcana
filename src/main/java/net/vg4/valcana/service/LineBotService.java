@@ -59,13 +59,8 @@ public class LineBotService implements BotService {
 			LineBotResponseContent botContent = botResponse.getContent();
 			String text = botContent.getText();
 			try (Stream<String> stream = Arrays.stream(text.split(""))) {
-				HttpPost post = new HttpPost(LINEBOTAPI_ENDPOINT);
-				post.setHeader("Content-Type", "application/json; charset=UTF-8");
-				post.setHeader("X-Line-ChannelID", LINE_CHANNEL_ID);
-				post.setHeader("X-Line-ChannelSecret", LINE_CHANNEL_SECRET);
-				post.setHeader("X-Line-Trusted-User-With-ACL", LINE_CHANNEL_MID);
 				try (CloseableHttpClient httpclient = HttpClients.createDefault()) { // .custom()
-					stream.parallel().forEach(e -> sendOneRequest(httpclient, post, botContent, e));
+					stream.parallel().forEach(e -> sendOneRequest(httpclient, botContent, e));
 				} catch (IOException ex) {
 					throw ex;
 				}
@@ -77,9 +72,14 @@ public class LineBotService implements BotService {
 		}
 	}
 
-	void sendOneRequest(CloseableHttpClient client, HttpPost post, LineBotResponseContent botContent,
-			String oneString) {
+	void sendOneRequest(CloseableHttpClient client, LineBotResponseContent botContent, String oneString) {
 		try {
+			HttpPost post = new HttpPost(LINEBOTAPI_ENDPOINT);
+			post.setHeader("Content-Type", "application/json; charset=UTF-8");
+			post.setHeader("X-Line-ChannelID", LINE_CHANNEL_ID);
+			post.setHeader("X-Line-ChannelSecret", LINE_CHANNEL_SECRET);
+			post.setHeader("X-Line-Trusted-User-With-ACL", LINE_CHANNEL_MID);
+
 			LineBotRequest request = new LineBotRequest();
 			request.setTo(Arrays.asList(botContent.getFrom()));
 			request.setContent(botContent);
