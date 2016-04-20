@@ -60,7 +60,7 @@ public class LineBotService implements BotService {
 			String text = botContent.getText();
 			try (Stream<String> stream = Arrays.stream(text.split(""))) {
 				try (CloseableHttpClient httpclient = HttpClients.createDefault()) { // .custom()
-					stream.parallel().forEach(e -> sendOneRequest(httpclient, botContent, e));
+					stream.parallel().forEach(e -> sendOneRequest(httpclient, botContent.clone(), e));
 				} catch (IOException ex) {
 					throw ex;
 				}

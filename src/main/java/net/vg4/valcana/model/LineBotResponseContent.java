@@ -7,7 +7,7 @@ import java.util.Map;
 import lombok.Data;
 
 @Data
-public class LineBotResponseContent {
+public class LineBotResponseContent implements Cloneable {
 	String toType;
 	BigDecimal createdTime;
 	String from;
@@ -20,4 +20,14 @@ public class LineBotResponseContent {
 	BigDecimal contentType;
 	String seq;
 
+	@Override
+	public LineBotResponseContent clone() {
+		try {
+			return (LineBotResponseContent) super.clone();
+		} catch (CloneNotSupportedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
 }
